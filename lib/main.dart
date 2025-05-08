@@ -55,9 +55,7 @@ class InitPage extends StatelessWidget {
       body: Column(
         children: [
           Expanded(
-            // Expands to take available space
             child: Center(
-              // Centers the image both horizontally and vertically
               child: FutureBuilder<Map<String, double>>(
                 future: _getImageDimensions('assets/introduction.png'),
                 builder: (context, snapshot) {
@@ -67,9 +65,7 @@ class InitPage extends StatelessWidget {
                       double imgWidth = dimensions['width']!;
                       double imgHeight = dimensions['height']!;
 
-                      // Responsive size (scale to screen width)
-                      double responsiveWidth =
-                          screenWidth; // 80% of screen width
+                      double responsiveWidth = screenWidth;
                       double aspectRatio = imgWidth / imgHeight;
                       double responsiveHeight = responsiveWidth / aspectRatio;
 
@@ -77,8 +73,8 @@ class InitPage extends StatelessWidget {
                         width: responsiveWidth,
                         height: responsiveHeight,
                         child: Image.asset(
-                          'assets/introduction.png',
-                          fit: BoxFit.contain, // Ensure the image fits properly
+                          'assets/introduction_with_name.png',
+                          fit: BoxFit.contain,
                         ),
                       );
                     } else {
@@ -91,9 +87,21 @@ class InitPage extends StatelessWidget {
               ),
             ),
           ),
-
-          // Centered button horizontally
-          SizedBox(height: 20), // Adjust top spacing
+          /*
+          SizedBox(height: 10),
+          Center(
+            child: Text(
+              """
+พัฒนาโดย นายยงยุทธ คำถาและคณะ
+Program of Nursing Specialty in Perioperative Nursing
+Ubon Ratchathani University
+""",
+              textAlign: TextAlign.center, // centers each line
+              style: TextStyle(fontSize: 18, color: Color(0xff634FA4)),
+            ),
+          ),
+           */
+          SizedBox(height: 20),
           Center(
             child: SquareButton(
               text: "Get Started",
@@ -113,7 +121,7 @@ class InitPage extends StatelessWidget {
             ),
           ),
 
-          SizedBox(height: 20), // Adjust bottom spacing
+          SizedBox(height: 20),
         ],
       ),
     );
@@ -132,7 +140,6 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
     "CHF": 1,
     "Sepsis": 1,
     "Pneumonia": 1,
-    "Immobilizing plaster cast": 2,
     "Hip, pelvis, or leg fracture": 5,
     "Stroke": 5,
     "Multiple trauma": 5,
@@ -140,7 +147,8 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
   };
   final Map<String, int> female = {
     "Pregnancy or postpartum (6 weeks)": 1,
-    "History of unexplained or recurrent spontaneous abortions": 1,
+    "History of unexplained stillborn infant, recurrent spontaneous abortion (≥3), premature birth with toxemia or growth-restricted infant":
+        1,
     "Oral contraceptive or hormone replacement therapy": 1,
   };
   final Map<String, int> diseaseHistory = {
@@ -158,12 +166,12 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
     "Other congenital or acquired thrombophilia": 3,
   };
   final Map<String, int> diseaseHistoryOptions = {
-    "Normal, out of bed": 0,
-    "Medical patient currently on bed rest": 1,
-    "Patient confined to bed > 72 hours": 2,
+    "Mobilizing leg": 0,
+    "Immobilizing leg cast or brace": 1,
   };
   final Map<String, int> presentandpastHistory = {
     "History of inflammatory bowel disease": 1,
+    "History of prior major surgery": 1,
     "Acute MI": 1,
     "COPD": 1,
     "Present or previous malignancy": 2,
@@ -177,10 +185,13 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
   };
   final Map<String, int> surgeryOptions = {
     "None surgery": 0,
-    "Minor surgery (< 45 mins)": 1,
-    "Major surgery (> 45 mins)": 2,
-    "Laparoscopic surgery (> 45 mins)": 2,
-    "Arthroscopic surgery (> 45 mins)": 2,
+    "Minor surgery planned": 1,
+    "Minor surgery (>60 min)": 2,
+    "Arthroscopic surgery (>60 min)": 2,
+    "Laparoscopic surgery (>60 min)": 2,
+    "Major surgery lasting 2–3 hrs": 3,
+    "Major surgery lasting over 3 hrs": 5,
+    "Elective major lower-extremity arthroplasty": 5,
   };
 
   Map<String, bool> selectedFactors = {};
@@ -218,7 +229,7 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
   Widget buildToggle({
     required bool value,
     required ValueChanged<bool?> onChanged,
-    required int score, // Add score parameter
+    required int score,
   }) {
     return SizedBox(
       width: 150,
@@ -226,7 +237,7 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
       child: ToggleSwitch(
         initialLabelIndex: value ? 1 : 0,
         totalSwitches: 2,
-        labels: ['No  0', 'Yes +$score'], // Dynamically show the score
+        labels: ['No  0', 'Yes +$score'],
         activeBgColor: [Color(0xff634FA4)],
         activeFgColor: Colors.white,
         inactiveBgColor: Colors.white,
@@ -244,29 +255,26 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
   ) {
     return factors.keys.map((factor) {
       return Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 8.0,
-        ), // Add space between each toggle list
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Expanded(child: Text(factor, style: TextStyle(fontSize: 16))),
+                Expanded(child: Text(factor, style: TextStyle(fontSize: 18))),
                 buildToggle(
                   value: selectedFactors[factor] ?? false,
                   onChanged: (value) {
                     setState(() {
-                      selectedFactors[factor] =
-                          value ?? false; // handle null value
+                      selectedFactors[factor] = value ?? false;
                     });
                     calculateRiskScore();
                   },
-                  score: factors[factor] ?? 0, // Pass the factor's score
+                  score: factors[factor] ?? 0,
                 ),
               ],
             ),
-            Divider(), // Add a line between each factor
+            Divider(),
           ],
         ),
       );
@@ -288,7 +296,8 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
   void calculateBMI() {
     setState(() {
       if (weight > 0 && height > 0) {
-        bmi = weight / (height * height);
+        double heightInMeters = height / 100;
+        bmi = weight / (heightInMeters * heightInMeters);
         calculateRiskScore();
       }
     });
@@ -316,8 +325,12 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
           .map((entry) => female[entry.key] ?? 0)
           .fold(0, (sum, value) => sum + value);
 
-      if (bmi >= 30) {
-        factorsScore += 1; // BMI score
+      if (bmi >= 30 && bmi < 40) {
+        factorsScore += 1;
+      } else if (bmi >= 40 && bmi < 50) {
+        factorsScore += 2;
+      } else if (bmi >= 50) {
+        factorsScore += 3;
       }
 
       totalScore =
@@ -347,14 +360,13 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
         padding: EdgeInsets.all(12.0),
         child: Column(
           children: [
-            // Risk Factors Checkboxes
             Expanded(
               child: ListView(
                 children: [
                   Container(
                     padding: EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
-                      color: Color(0xff634FA4), // Set background color to white
+                      color: Color(0xff634FA4),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Align(
@@ -370,18 +382,14 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
                     ),
                   ),
                   SizedBox(height: 10),
-                  // Age Dropdown
                   Row(
                     children: [
                       SizedBox(
-                        width:
-                            screenWidth * 0.3, // 30% of screen width for text
+                        width: screenWidth * 0.3,
                         child: Text("Age:", style: TextStyle(fontSize: 18)),
                       ),
                       SizedBox(
-                        width:
-                            screenWidth *
-                            0.6, // 60% of screen width for dropdown
+                        width: screenWidth * 0.6,
                         child: GestureDetector(
                           onTap: () {
                             DropDownState<String>(
@@ -415,14 +423,16 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
                               border: Border.all(color: Colors.black12),
                               borderRadius: BorderRadius.circular(5),
                             ),
-                            child: Text(selectedAge),
+                            child: Text(
+                              selectedAge,
+                              style: TextStyle(fontSize: 18),
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
                   SizedBox(height: 10),
-                  // Gender Selection
                   Row(
                     children: List.generate(lists.length, (index) {
                       String genderTitle = lists[index]['title'];
@@ -434,6 +444,7 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
                           value: genderTitle,
                           groupValue: selectedGender,
                           title: genderTitle,
+                          titleStyle: TextStyle(fontSize: 18),
                           selectedRadioIconData: lists[index]['iconData'],
                           unselectedRadioIconData: lists[index]['iconData'],
                           borderColor: genderColor,
@@ -451,7 +462,6 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
                     }),
                   ),
                   SizedBox(height: 10),
-                  // Weight and Height Inputs
                   Row(
                     children: [
                       SizedBox(
@@ -464,6 +474,7 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
                       SizedBox(
                         width: screenWidth * 0.6,
                         child: TextField(
+                          controller: weightController,
                           keyboardType: TextInputType.number,
                           onChanged: (value) {
                             setState(() {
@@ -473,21 +484,17 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
                           },
                           decoration: InputDecoration(
                             hintText: "Enter Weight (kg)",
+                            hintStyle: TextStyle(fontSize: 18),
                             focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.blue,
-                              ), // Change the color when focused
+                              borderSide: BorderSide(color: Colors.blue),
                             ),
                             enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.green,
-                              ), // Change the color when not focused
+                              borderSide: BorderSide(color: Colors.green),
                             ),
                             suffixIcon: Icon(
-                              Icons
-                                  .scale_rounded, // Icon placed at the top right
-                              size: 20, // Adjust icon size as needed
-                              color: Colors.blue, // Change icon color if needed
+                              Icons.scale_rounded,
+                              size: 20,
+                              color: Colors.blue,
                             ),
                           ),
                         ),
@@ -501,13 +508,14 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
                       SizedBox(
                         width: screenWidth * 0.3,
                         child: Text(
-                          "Height (m):",
+                          "Height (cm):",
                           style: TextStyle(fontSize: 18),
                         ),
                       ),
                       SizedBox(
                         width: screenWidth * 0.6,
                         child: TextField(
+                          controller: heightController,
                           keyboardType: TextInputType.number,
                           onChanged: (value) {
                             setState(() {
@@ -516,21 +524,20 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
                             calculateBMI();
                           },
                           decoration: InputDecoration(
-                            hintText: "Enter Height (m)",
+                            hintText: "Enter Height (cm)",
+                            hintStyle: TextStyle(fontSize: 18),
                             focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.blue,
-                              ), // Change the color when focused
+                              borderSide: BorderSide(color: Colors.blue),
                             ),
                             enabledBorder: UnderlineInputBorder(
                               borderSide: BorderSide(
                                 color: const Color.fromARGB(255, 212, 159, 255),
-                              ), // Change the color when not focused
+                              ),
                             ),
                             suffixIcon: Icon(
-                              Icons.straighten, // Icon placed at the top right
-                              size: 20, // Adjust icon size as needed
-                              color: Colors.blue, // Change icon color if needed
+                              Icons.straighten,
+                              size: 20,
+                              color: Colors.blue,
                             ),
                           ),
                         ),
@@ -538,21 +545,17 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
                     ],
                   ),
                   SizedBox(height: 10),
-                  // for Surgery
                   Row(
                     children: [
                       SizedBox(
-                        width:
-                            screenWidth * 0.3, // 30% of screen width for text
+                        width: screenWidth * 0.3,
                         child: Text(
                           "Surgery type:",
                           style: TextStyle(fontSize: 18),
                         ),
                       ),
                       SizedBox(
-                        width:
-                            screenWidth *
-                            0.6, // 60% of screen width for dropdown
+                        width: screenWidth * 0.6,
                         child: GestureDetector(
                           onTap: () {
                             DropDownState<String>(
@@ -588,60 +591,27 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
                               border: Border.all(color: Colors.black12),
                               borderRadius: BorderRadius.circular(5),
                             ),
-                            child: Text(selectedSurgery),
+                            child: Text(
+                              selectedSurgery,
+                              style: TextStyle(fontSize: 18),
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
-                  // Female-specific options
-                  Visibility(
-                    visible: gender == "Female",
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 20),
-                        ...buildToggleList(selectedFemale, female),
-                      ],
-                    ),
-                  ),
                   SizedBox(height: 20),
-                  Container(
-                    padding: EdgeInsets.all(8.0),
-                    color: const Color.fromARGB(255, 216, 216, 216),
-                    child: Text(
-                      "Recent (< 1 month) events",
-                      style: TextStyle(fontSize: 13),
-                    ),
-                  ),
-
-                  // Risk factors checkboxes
-                  ...buildToggleList(selectedFactors, recentEvents),
-                  Container(
-                    padding: EdgeInsets.all(8.0),
-                    color: const Color.fromARGB(255, 216, 216, 216),
-                    child: Text(
-                      "Venous disease or clotting disorder",
-                      style: TextStyle(fontSize: 13),
-                    ),
-                  ),
-                  ...buildToggleList(selectedDiseaseHistory, diseaseHistory),
-
-                  // for Mobility
                   Row(
                     children: [
                       SizedBox(
-                        width:
-                            screenWidth * 0.3, // 30% of screen width for text
+                        width: screenWidth * 0.3,
                         child: Text(
                           "Mobility:",
                           style: TextStyle(fontSize: 18),
                         ),
                       ),
                       SizedBox(
-                        width:
-                            screenWidth *
-                            0.6, // 60% of screen width for dropdown
+                        width: screenWidth * 0.6,
                         child: GestureDetector(
                           onTap: () {
                             DropDownState<String>(
@@ -679,19 +649,83 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
                               border: Border.all(color: Colors.black12),
                               borderRadius: BorderRadius.circular(5),
                             ),
-                            child: Text(selectedMobility),
+                            child: Text(
+                              selectedMobility,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
+                  SizedBox(height: 10),
+                  Visibility(
+                    visible: gender == "Female",
+                    child: Container(
+                      padding: EdgeInsets.all(8.0),
+                      color: Colors.pink,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "For Women Only",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Visibility(
+                    visible: gender == "Female",
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [...buildToggleList(selectedFemale, female)],
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    color: Color(0xff634FA4),
+                    child: Text(
+                      "Recent (< 1 month) events",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  ...buildToggleList(selectedFactors, recentEvents),
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    color: Color(0xff634FA4),
+                    child: Text(
+                      "Venous disease or clotting disorder",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  ...buildToggleList(selectedDiseaseHistory, diseaseHistory),
                   SizedBox(height: 20),
                   Container(
                     padding: EdgeInsets.all(8.0),
-                    color: const Color.fromARGB(255, 216, 216, 216),
+                    color: Color(0xff634FA4),
                     child: Text(
                       "Present and Past History",
-                      style: TextStyle(fontSize: 13),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
 
@@ -701,9 +735,7 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
                   ),
                   SizedBox(height: 20),
                   Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment
-                            .center, // Center the buttons horizontally
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       SquareButton(
                         buttonColor: Color.fromARGB(255, 255, 201, 131),
@@ -717,41 +749,7 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
                         },
                         text: ("BACK"),
                       ),
-                      SizedBox(width: 5), // Space between buttons
-                      /*
-                      SquareButton(
-                        height: 45,
-                        width: screenWidth * 0.25,
-                        buttonColor: Colors.redAccent,
-                        onPressed: () {
-                          setState(() {
-                            selectedFactors.updateAll((key, value) => false);
-                            selectedFemale.updateAll((key, value) => false);
-                            selectedDiseaseHistory.updateAll((key, value) => false);
-                            selectedPresentAndPastHistory.updateAll((key, value) => false);
-                            weight = 0;
-                            height = 0;
-                            bmi = 0;
-                            surgeryScore = 0;
-                            mobilityScore = 0;
-                            totalScore = 0;
-                            ageScore = 0;
-                            diseaseHistoryScore = 0;
-                            presentAndPastHistoryScore = 0;
-                            femaleScore = 0;
-                            selectedAge = "Select Age";
-                            selectedSurgery = "Select Surgery";
-                            selectedMobility = "Select Mobility";
-                            gender = "Male";
-                            selectedGender = null;
-                            weightController?.clear();
-                            heightController?.clear();
-                          });
-                        },
-                        text: ("Reset"),
-                      ),
-                  SizedBox(height: 5),
-                  */
+                      SizedBox(width: 5),
                       SquareButton(
                         height: 45,
                         width: screenWidth * 0.25,
@@ -770,52 +768,10 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
                         },
                         text: ("Results"),
                       ),
-                      SizedBox(width: 10), // Space between buttons
+                      SizedBox(width: 10),
                     ],
                   ),
                   SizedBox(height: 20),
-
-                  /*
-                                    Row(
-                    children: [
-                      SizedBox(
-                        width: screenWidth * 0.3,
-                        child: Text(
-                          "Weight (kg):",
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ),
-                      SizedBox(
-                        width: screenWidth * 0.6,
-                        child: TextField(
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            setState(() {
-                              weight = double.tryParse(value) ?? 0;
-                            });
-                            calculateBMI();
-                          },
-                          decoration: InputDecoration(
-                            hintText: "Enter Weight (kg)",
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                   */
-                  /*
-                  TextFieldWithLabel(
-                    controller: weightController,
-                    labelText: "",
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      setState(() {
-                        weight = double.tryParse(value) ?? 0;
-                      });
-                      calculateBMI();
-                    },
-                  ),
-                  */
                 ],
               ),
             ),
@@ -823,7 +779,16 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
             Container(
               padding: EdgeInsets.all(8.0),
               decoration: BoxDecoration(
-                color: Color(0xff634FA4), // Set background color to white
+                color:
+                    getRiskCategory().toLowerCase() == "very low risk"
+                        ? Color(0xff007074)
+                        : getRiskCategory().toLowerCase() == "low risk"
+                        ? Color(0xff5F99AE)
+                        : getRiskCategory().toLowerCase() == "moderate risk"
+                        ? Color(0xffFDAB9E)
+                        : getRiskCategory().toLowerCase() == "high risk"
+                        ? Color(0xffBF3131)
+                        : Color(0xff007074), // Set background color to white
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
@@ -846,16 +811,7 @@ class _CapriniRiskCalculatorState extends State<CapriniRiskCalculator> {
                       "Risk Category: ${getRiskCategory()}",
                       style: TextStyle(
                         fontSize: 18,
-                        color:
-                            getRiskCategory() == "Very High Risk"
-                                ? Colors.red
-                                : getRiskCategory() == "High Risk"
-                                ? Colors.orange
-                                : getRiskCategory() == "Moderate Risk"
-                                ? const Color.fromARGB(255, 229, 255, 0)
-                                : getRiskCategory() == "Low Risk"
-                                ? Color.fromARGB(255, 255, 201, 131)
-                                : Color(0xffffffff),
+                        color: Color(0xffffffff),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1008,8 +964,8 @@ class _ResultPageState extends State<ResultPage> {
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
                 child: Image.asset(
                   'assets/lmwh_images/Picture1.jpg',
-                  height: 500,
-                  fit: BoxFit.contain,
+                  width: MediaQuery.of(context).size.width,
+                  fit: BoxFit.fitWidth,
                 ),
               ),
               SizedBox(height: 8),
@@ -1102,6 +1058,32 @@ class _ResultPageState extends State<ResultPage> {
             ],
           ),
     };
+    String translateRiskCategory(String riskCategory) {
+      if (riskCategory.toLowerCase() == "very low risk") {
+        return "คุณไม่มีความเสี่ยง (Very Low Risk)";
+      } else if (riskCategory.toLowerCase() == "low risk") {
+        return "คุณมีความเสี่ยงต่ำ (Low Risk)";
+      } else if (riskCategory.toLowerCase() == "moderate risk") {
+        return "คุณมีความเสี่ยงปานกลาง (Moderate Risk)";
+      } else if (riskCategory.toLowerCase() == "high risk") {
+        return "คุณมีความเสี่ยงสูง (High Risk)";
+      }
+      return riskCategory;
+    }
+
+    Color themeColor(String riskCategory) {
+      if (riskCategory.toLowerCase() == "very low risk") {
+        return Color(0xff007074);
+      } else if (riskCategory.toLowerCase() == "low risk") {
+        return Color(0xff5F99AE);
+      } else if (riskCategory.toLowerCase() == "moderate risk") {
+        return Color(0xffFDAB9E);
+      } else if (riskCategory.toLowerCase() == "high risk") {
+        return Color(0xffBF3131);
+      }
+      return Color(0xff634FA4);
+    }
+
     return Scaffold(
       body: Stack(
         children: [
@@ -1113,7 +1095,7 @@ class _ResultPageState extends State<ResultPage> {
                 Container(
                   padding: EdgeInsets.all(8.0),
                   decoration: BoxDecoration(
-                    color: Color(0xff634FA4),
+                    color: themeColor(widget.riskCategory),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Align(
@@ -1135,6 +1117,13 @@ class _ResultPageState extends State<ResultPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      Text(
+                        translateRiskCategory(widget.riskCategory),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 10),
                       // Wrap the ExpansionTileGroup in a Container with constraints
                       Container(
@@ -1177,9 +1166,10 @@ class _ResultPageState extends State<ResultPage> {
                                   ),
                                   border: Border(
                                     bottom: BorderSide(
-                                      color: Theme.of(context).dividerColor,
+                                      color: themeColor(widget.riskCategory),
                                     ),
                                   ),
+                                  textColor: themeColor(widget.riskCategory),
                                   children: [
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
@@ -1209,7 +1199,7 @@ class _ResultPageState extends State<ResultPage> {
             right: 0,
             child: Center(
               child: SquareButton(
-                buttonColor: const Color(0xff634FA4),
+                buttonColor: themeColor(widget.riskCategory),
                 width: screenWidth * 0.5,
                 height: 45,
                 onPressed: () {
